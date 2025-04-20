@@ -9,14 +9,13 @@ defmodule XEts.MixProject do
       description: "An extended ETS library for Elixir",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
+      package: package(),
       docs: [
         extras: ["README.md", "LICENSE"]
       ],
       dialyzer: [
         plt_add_deps: :app_tree
-      ],
-      licenses: ["MIT"],
-      links: %{emetrol: "https://emetrol.com"}
+      ]
     ]
   end
 
@@ -25,6 +24,17 @@ defmodule XEts.MixProject do
     [
       extra_applications: [:logger],
       mod: {XEts.Application, []}
+    ]
+  end
+
+  defp package do
+    [
+      files: ~w(lib LICENSE mix.exs README.md .formatter.exs),
+      licenses: ["MIT"],
+      links: %{
+        "E-MetroTel" => "https://emetrol.com",
+        "GitHub" => "https://github.com/infinityoneframework/x_ets"
+      }
     ]
   end
 
