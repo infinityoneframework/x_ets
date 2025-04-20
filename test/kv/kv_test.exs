@@ -44,7 +44,7 @@ defmodule XEts.KVTest do
   end
 
   test "match/3 with wildcard", %{tab: tab} do
-    assert KV.match(tab, {:key, :"$1"}, :"$2") == nil
+    assert KV.match(tab, {:key, :"$1"}, :"$2") == []
   end
 
   test "match/4", %{tab: tab} do
@@ -132,7 +132,7 @@ defmodule XEts.KVTest do
     KV.put(tab, {:info, 1}, 2)
     KV.put(tab, {:info, 2}, 3)
     assert KV.match_delete(tab, {:info, :"$1"})
-    assert KV.match(tab, :"$1") == nil
+    assert KV.match(tab, :"$1") == []
   end
 
   test "delete_match/3", %{tab: tab} do

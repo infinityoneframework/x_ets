@@ -126,7 +126,7 @@ defmodule XEts.KV do
       :v
   """
   @spec match(t(), any(), any(), any()) :: any()
-  def match(tab, key, wildcard \\ :"$2", default \\ nil)
+  def match(tab, key, wildcard \\ :"$2", default \\ [])
 
   def match(%{tab: tab}, key, wildcard, default)
       when wildcard in [:_, :"$1", :"$2", :"$3", :"$4", :"$5", :"$6"] do
@@ -220,9 +220,13 @@ defmodule XEts.KV do
       [{:k, :v}]
   """
   @spec put_new(t(), any()) :: t()
-  def put_new(%{tab: tab} = t, key, value) do
+  def put_new(%{tab: _} = tab, key, value) do
+    put_new(tab.tab, key, value)
+    tab
+  end
+
+  def put_new(tab, key, value) do
     :shards.insert_new(tab, {key, value})
-    t
   end
 
   @doc """
@@ -241,9 +245,13 @@ defmodule XEts.KV do
       [{:k, :v}, {:k2, :v2}]
   """
   @spec put_new(t(), any()) :: t()
-  def put_new(%{tab: tab} = t, item_or_items) do
+  def put_new(%{tab: _} = tab, item_or_items) do
+    put_new(tab.tab, item_or_items)
+    tab
+  end
+
+  def put_new(tab, item_or_items) do
     :shards.insert_new(tab, item_or_items)
-    t
   end
 
   @spec new(atom(), list()) :: t() | none()

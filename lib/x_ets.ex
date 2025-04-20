@@ -1355,8 +1355,7 @@ defmodule XEts do
   end
 
   def update_element(tab, key, element_spec, meta) do
-    :shards.update_element(tab.tab, key, element_spec, meta)
-    tab
+    :shards.update_element(tab, key, element_spec, meta)
   end
 
   @doc """
