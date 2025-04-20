@@ -30,9 +30,9 @@ defmodule XEts.MixProject do
     [
       {:shards, "~> 1.1"},
       {:mix_test_watch, "~> 1.0", only: :dev, runtime: false},
-      {:dialyxir, "~> 1.1", only: [:dev], runtime: false, override: true},
-      {:earmark, "1.4.15", override: true},
-      {:ex_doc, "0.24.2", override: true, only: :dev}
+      {:dialyxir, "~> 1.1", only: [:dev], runtime: false},
+      {:earmark, "1.4.15"},
+      {:ex_doc, "0.24.2", only: :dev}
     ]
   end
 end
