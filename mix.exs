@@ -6,14 +6,17 @@ defmodule XEts.MixProject do
       app: :x_ets,
       version: "0.1.0",
       elixir: "~> 1.12",
+      description: "An extended ETS library for Elixir",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       docs: [
-        extras: ["README.md"]
+        extras: ["README.md", "LICENSE"]
       ],
       dialyzer: [
         plt_add_deps: :app_tree
-      ]
+      ],
+      licenses: ["MIT"],
+      links: %{emetrol: "https://emetrol.com"}
     ]
   end
 
