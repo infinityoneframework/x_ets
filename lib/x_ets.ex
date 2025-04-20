@@ -1079,7 +1079,7 @@ defmodule XEts do
   Select items in reverse order given a match spec and limit or metadata.
 
   If 3rd argument is pos_integer() this function behaves like ets:select_reverse/3,
-  otherwise, the 3rd argument is assumed as shards_meta:t()` and it behaves like
+  otherwise, the 3rd argument is assumed as `shards_meta:t()` and it behaves like
   :ets.select_reverse/2.
 
   The order in which results are returned might be not the same as the original
