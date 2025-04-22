@@ -13,6 +13,7 @@ defmodule XEts.KV do
   defstruct [:tab]
 
   @type t() :: %__MODULE__{tab: atom()}
+  @type tab :: atom() | :ets.tid()
 
   @default_opts [:named_table, parallel: true, read_concurrency: true, write_concurrency: true]
 
@@ -141,15 +142,17 @@ defmodule XEts.KV do
   end
 
   @doc """
-  Delete an item from the table.
+  Delete an item or items from the table.
 
-      iex> XEts.KV.new(:foo, []) |> XEts.KV.put(:k, :v) |> XEts.KV.match_delete(:"$1") |> XEts.KV.to_list()
+      iex> XEts.KV.new(:foo, []) |>
+      ...> XEts.KV.put(:k, :v) |>
+      ...> XEts.KV.match_delete({:_, :_}) |>
+      ...> XEts.KV.to_list()
       []
   """
-  @spec match_delete(t(), any(), any()) :: t()
-  def match_delete(%{tab: tab} = t, key_match, value_match \\ :"$2") do
-    :shards.match_delete(tab, {key_match, value_match})
-    t
+  @spec match_delete(t() | tab(), term()) :: t() | boolean()
+  def match_delete(tab, match_spec) do
+    XEts.match_delete(tab, match_spec)
   end
 
   @doc """
@@ -161,9 +164,9 @@ defmodule XEts.KV do
       iex> :bar |> XEts.KV.new([]) |> XEts.KV.member?(:x)
       false
   """
-  @spec member?(t(), any()) :: boolean()
-  def member?(%{tab: tab}, key) do
-    :shards.member(tab, key)
+  @spec member?(t() | tab(), any()) :: boolean()
+  def member?(tab, key) do
+    XEts.member?(tab, key)
   end
 
   @doc """

@@ -4,7 +4,7 @@ defmodule XEts.MixProject do
   def project do
     [
       app: :x_ets,
-      version: "0.1.0",
+      version: "0.2.0",
       elixir: "~> 1.12",
       description: "An extended ETS library for Elixir",
       start_permanent: Mix.env() == :prod,
@@ -32,8 +32,7 @@ defmodule XEts.MixProject do
       files: ~w(lib LICENSE mix.exs README.md .formatter.exs),
       licenses: ["MIT"],
       links: %{
-        "E-MetroTel" => "https://emetrol.com",
-        "GitHub" => "https://github.com/infinityoneframework/x_ets"
+        "E-MetroTel" => "https://emetrol.com"
       }
     ]
   end

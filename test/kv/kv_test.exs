@@ -131,7 +131,7 @@ defmodule XEts.KVTest do
   test "delete_match/2", %{tab: tab} do
     KV.put(tab, {:info, 1}, 2)
     KV.put(tab, {:info, 2}, 3)
-    assert KV.match_delete(tab, {:info, :"$1"})
+    assert KV.match_delete(tab, {{:info, :_}, :_})
     assert KV.match(tab, :"$1") == []
   end
 
@@ -139,7 +139,7 @@ defmodule XEts.KVTest do
     KV.put(tab, {:info, 1, 5}, 2)
     KV.put(tab, {:info, 1, 6}, 5)
     KV.put(tab, {:info, 2, 6}, 3)
-    assert KV.match_delete(tab, {:"$1", 1, :"$2"}, :"$3")
+    assert KV.match_delete(tab, {{:_, 1, :_}, :_})
     assert KV.to_list(tab) == [{{:info, 2, 6}, 3}]
   end
 
