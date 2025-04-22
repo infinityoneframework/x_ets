@@ -671,9 +671,9 @@ defmodule XEts do
       iex> tab |> XEts.match_delete({:_, 2}) |> XEts.to_list()
       []
   """
-  @spec match_delete(t(), any()) :: t()
+  @spec match_delete(t(), any()) :: t() | boolean()
   def match_delete(%{tab: _} = tab, pattern) do
-    :shards.match_delete(tab.tab, pattern)
+    match_delete(tab.tab, pattern)
     tab
   end
 
