@@ -27,9 +27,9 @@ defmodule XEts do
 
   defstruct [:tab, keypos: 1]
 
-  @type t() :: %__MODULE__{tab: atom(), keypos: integer()}
+  @type t() :: %__MODULE__{tab: tab(), keypos: pos_integer()}
   @type meta :: :shards_meta.t()
-  @type tab :: atom() | :ets.tid()
+  @type tab :: :shards.tab()
   @type continuation() :: :shards.continuation()
   @type match_spec() :: :ets.match_spec()
   @type limit() :: pos_integer()
@@ -253,10 +253,11 @@ defmodule XEts do
   """
   @impl true
   @spec fetch(t(), any()) :: {:ok, any()} | :error
-  def fetch(tab, key) do
-    case get(tab, key, :error) do
-      :error -> :error
-      value -> {:ok, value}
+  def fetch(%{tab: tab, keypos: keypos}, key) do
+    try do
+      {:ok, lookup_element(tab, key, keypos + 1)}
+    rescue
+      ArgumentError -> :error
     end
   end
 
@@ -377,16 +378,19 @@ defmodule XEts do
       {2, tab}
   """
   @impl true
-  @spec get_and_update(t(), any(), any()) :: any()
+  @spec get_and_update(t(), term(), (term() -> {term(), term()} | :pop)) :: {term(), t()}
   def get_and_update(tab, key, fun) do
-    {old, updated} =
-      case fetch(tab, key) do
-        {:ok, value} -> fun.(value)
-        :error -> fun.(nil)
-      end
+    case fun.(get(tab, key)) do
+      {old, updated} ->
+        put(tab, key, updated)
+        {old, tab}
 
-    put(tab, key, updated)
-    {old, tab}
+      :pop ->
+        pop(tab, key)
+
+      other ->
+        raise ArgumentError, "expected a two-element tuple or :pop, got: #{inspect(other)}"
+    end
   end
 
   @doc """
@@ -1243,7 +1247,8 @@ defmodule XEts do
   @doc """
   Equivalent to `:ets.test_ms/2`.
   """
-  @spec test_ms(tuple(), match_spec()) :: boolean()
+  @spec test_ms(tuple(), match_spec()) ::
+          {:ok, term()} | {:error, [{:error | :warning, charlist()}]}
   def test_ms(tuple, match_spec), do: :shards.test_ms(tuple, match_spec)
 
   @doc """

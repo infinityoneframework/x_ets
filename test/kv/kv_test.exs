@@ -157,6 +157,7 @@ defmodule XEts.KVTest do
 
   test "named tests" do
     tab = KV.new(:test_tab)
+    assert KV.info(tab, :parallel)
     assert KV.to_list(tab) == []
     tab = %{tab | tab: :test_tab}
     KV.put(tab, :x, :y)
@@ -186,5 +187,14 @@ defmodule XEts.KVTest do
   test "info/1", %{tab: tab} do
     assert KV.info(tab, :keypos) == 1
     assert KV.info(tab, :name) == :ets_test
+  end
+
+  test "match_delete and member? preserve wrapped and raw table APIs", %{tab: tab} do
+    assert KV.put(tab, :key, :value) == tab
+    assert KV.member?(tab, :key)
+    assert KV.member?(tab.tab, :key)
+    assert KV.match_delete(tab, {:key, :_}) == tab
+    refute KV.member?(tab, :key)
+    assert KV.match_delete(tab.tab, {:_, :_}) == true
   end
 end
