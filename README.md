@@ -15,10 +15,33 @@ by adding `x_ets` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:x_ets, "~> 0.1.0"}
+    {:x_ets, "~> 0.2.0"}
   ]
 end
 ```
+
+## Development
+
+The checked-in `.tool-versions` selects Elixir 1.20.4 and Erlang/OTP 29.1.2.
+
+```sh
+mix deps.get
+mix compile --warnings-as-errors
+mix test --warnings-as-errors
+mix dialyzer
+mix coveralls
+mix docs --warnings-as-errors
+```
+
+Both Access implementations distinguish a stored `:error` from a missing key and
+support callbacks returning `:pop` from `get_and_update/3`.
+
+Shards 1.1.1 omits its supported `:parallel` option from its exported option type.
+The existing Dialyzer exception is narrowed to `XEts.KV.new/1`, whose default options
+enable parallel mode; a regression test verifies that default path. Project analysis
+otherwise passes without ignore filters. Clean development/test dependency builds
+still emit upstream MixTestWatch/ExCoveralls compiler warnings; dependency source files
+are not patched locally.
 
 ## Usage
 
