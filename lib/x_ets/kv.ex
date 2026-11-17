@@ -12,12 +12,15 @@ defmodule XEts.KV do
 
   defstruct [:tab]
 
-  @type t() :: %__MODULE__{tab: atom()}
-  @type tab :: atom() | :ets.tid()
+  @type t() :: %__MODULE__{tab: tab()}
+  @type tab :: :shards.tab()
 
   @default_opts [:named_table, parallel: true, read_concurrency: true, write_concurrency: true]
 
-  @dialyzer {:no_return, new: 2, new: 1}
+  # Shards 1.1.1 accepts :parallel but omits it from its option() type, making
+  # Dialyzer infer that the default-argument wrapper never returns. The named-table
+  # regression test verifies this default path with parallel mode enabled.
+  @dialyzer {:no_return, new: 1}
 
   @doc """
   Delete an item from the table.
@@ -54,10 +57,11 @@ defmodule XEts.KV do
   """
   @impl true
   @spec fetch(t(), any()) :: {:ok, any()} | :error
-  def fetch(tab, key) do
-    case get(tab, key, :error) do
-      :error -> :error
-      value -> {:ok, value}
+  def fetch(%{tab: tab}, key) do
+    try do
+      {:ok, :shards.lookup_element(tab, key, 2)}
+    rescue
+      ArgumentError -> :error
     end
   end
 
@@ -86,16 +90,19 @@ defmodule XEts.KV do
       {2, tab}
   """
   @impl true
-  @spec get_and_update(t(), any(), any()) :: any()
+  @spec get_and_update(t(), term(), (term() -> {term(), term()} | :pop)) :: {term(), t()}
   def get_and_update(tab, key, fun) do
-    {old, updated} =
-      case fetch(tab, key) do
-        {:ok, value} -> fun.(value)
-        :error -> fun.(nil)
-      end
+    case fun.(get(tab, key)) do
+      {old, updated} ->
+        put(tab, key, updated)
+        {old, tab}
 
-    put(tab, key, updated)
-    {old, tab}
+      :pop ->
+        pop(tab, key)
+
+      other ->
+        raise ArgumentError, "expected a two-element tuple or :pop, got: #{inspect(other)}"
+    end
   end
 
   @doc """
@@ -115,7 +122,7 @@ defmodule XEts.KV do
       iex> XEts.KV.new(:foo, []) |> XEts.KV.info(:name)
       :foo
   """
-  @spec info(t()) :: list()
+  @spec info(t(), atom()) :: term()
   def info(%{tab: tab}, key) do
     :shards.info(tab, key)
   end
@@ -151,6 +158,11 @@ defmodule XEts.KV do
       []
   """
   @spec match_delete(t() | tab(), term()) :: t() | boolean()
+  def match_delete(%{tab: tab} = kv, match_spec) do
+    XEts.match_delete(tab, match_spec)
+    kv
+  end
+
   def match_delete(tab, match_spec) do
     XEts.match_delete(tab, match_spec)
   end
@@ -165,6 +177,8 @@ defmodule XEts.KV do
       false
   """
   @spec member?(t() | tab(), any()) :: boolean()
+  def member?(%{tab: tab}, key), do: XEts.member?(tab, key)
+
   def member?(tab, key) do
     XEts.member?(tab, key)
   end
@@ -222,7 +236,7 @@ defmodule XEts.KV do
       iex> XEts.KV.new(:foo, []) |> XEts.KV.put_new(:k, :v) |> XEts.KV.to_list()
       [{:k, :v}]
   """
-  @spec put_new(t(), any()) :: t()
+  @spec put_new(t() | tab(), term(), term()) :: t() | boolean()
   def put_new(%{tab: _} = tab, key, value) do
     put_new(tab.tab, key, value)
     tab
@@ -247,7 +261,7 @@ defmodule XEts.KV do
       ...>XEts.KV.to_list()
       [{:k, :v}, {:k2, :v2}]
   """
-  @spec put_new(t(), any()) :: t()
+  @spec put_new(t() | tab(), term()) :: t() | boolean()
   def put_new(%{tab: _} = tab, item_or_items) do
     put_new(tab.tab, item_or_items)
     tab
@@ -257,7 +271,8 @@ defmodule XEts.KV do
     :shards.insert_new(tab, item_or_items)
   end
 
-  @spec new(atom(), list()) :: t() | none()
+  @spec new(atom(), [:shards.option() | {:parallel, boolean()} | {:parallel_timeout, timeout()}]) ::
+          t()
   def new(tab, opts \\ @default_opts) do
     %__MODULE__{tab: :shards.new(tab, opts)}
   end
