@@ -15,7 +15,7 @@ by adding `x_ets` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:x_ets, "~> 0.2.0"}
+    {:x_ets, "~> 1.0"}
   ]
 end
 ```
@@ -67,4 +67,3 @@ iex> tab |> update_in([:y, :z], & &1 + 1) |> get_in([:y, :z])
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
 be found at <https://hexdocs.pm/x_ets>.
-

@@ -257,7 +257,7 @@ defmodule XEts do
     try do
       {:ok, lookup_element(tab, key, keypos + 1)}
     rescue
-      ArgumentError -> :error
+      _ -> :error
     end
   end
 
